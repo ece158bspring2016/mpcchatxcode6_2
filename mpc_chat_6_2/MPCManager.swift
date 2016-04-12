@@ -29,7 +29,7 @@ class MPCManager: NSObject, MCSessionDelegate, MCNearbyServiceBrowserDelegate, M
     var browser: MCNearbyServiceBrowser!
     var advertiser: MCNearbyServiceAdvertiser!
     var foundPeers = [MCPeerID]()
-    var invitationHandler: ((Bool, MCSession) ->Void)!
+    var invitationHandler: ((Bool, MCSession!) ->Void)!
     
     
     override init(){
@@ -52,13 +52,13 @@ class MPCManager: NSObject, MCSessionDelegate, MCNearbyServiceBrowserDelegate, M
     }
     
     //Delagete methods
-    func browser(browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+    func browser(browser: MCNearbyServiceBrowser!, foundPeer peerID: MCPeerID!, withDiscoveryInfo info: [NSObject : AnyObject]!) {
         
         var peerAlreadyInBrowser = false
         
         //TODO: All discover information for a specific peer will be here. Need to pass it to the foundPeer delegate
         //TODO LATER: Implement faster search function to find peers and remove
-        for (index, aPeer) in foundPeers.enumerate()
+        for (index, aPeer) in enumerate(foundPeers)
         {
             if aPeer == peerID{
                 foundPeers.insert(peerID, atIndex: index)
@@ -74,8 +74,9 @@ class MPCManager: NSObject, MCSessionDelegate, MCNearbyServiceBrowserDelegate, M
         delegate?.foundPeer()
     }
     
-    func browser(browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-        for (index, aPeer) in foundPeers.enumerate()
+    
+    func browser(browser: MCNearbyServiceBrowser!, lostPeer peerID: MCPeerID!) {
+        for (index, aPeer) in enumerate(foundPeers)
         {
             if aPeer == peerID{
                 foundPeers.removeAtIndex(index)
@@ -90,11 +91,12 @@ class MPCManager: NSObject, MCSessionDelegate, MCNearbyServiceBrowserDelegate, M
         delegate?.lostPeer()
     }
     
-    func browser(browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: NSError) {
+    func browser(browser: MCNearbyServiceBrowser!, didNotStartBrowsingForPeers error: NSError!) {
         print(error.localizedDescription)
     }
     
-    func advertiser(advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: NSData?, invitationHandler: ((Bool, MCSession) -> Void)) {
+    
+    func advertiser(advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: NSData?, invitationHandler: ((Bool, MCSession!) -> Void)) {
         
         self.invitationHandler = invitationHandler
         
@@ -156,13 +158,12 @@ class MPCManager: NSObject, MCSessionDelegate, MCNearbyServiceBrowserDelegate, M
         
         //This is the data that gets sent to peer
         let dataToSend = NSKeyedArchiver.archivedDataWithRootObject(dictionary)
-        let peersArray = [targetPeer]
+        let peersArray = NSArray(object: targetPeer)//[targetPeer]
+        var error: NSError?
         
-        do {
-            try session.sendData(dataToSend, toPeers: peersArray, withMode: MCSessionSendDataMode.Reliable)
-        }catch let error as NSError {
+        if !session.sendData(dataToSend, toPeers: peersArray as [AnyObject], withMode: MCSessionSendDataMode.Reliable, error: &error){
             
-            print(error.localizedDescription)
+            print(error?.localizedDescription)
             return false
         }
         

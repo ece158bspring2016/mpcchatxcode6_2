@@ -12,7 +12,7 @@ import UIKit
 class ChatViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
     
     var messagesArray: [Dictionary<String, String>] = []
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let appDelegate = UIApplication.sharedApplication().delegate as AppDelegate
 
     @IBOutlet weak var txtChat: UITextField!
     @IBOutlet weak var tblChat: UITableView!
@@ -33,8 +33,8 @@ class ChatViewController: UIViewController, UITextFieldDelegate, UITableViewDele
         tblChat.estimatedRowHeight = 60.0
         tblChat.rowHeight = UITableViewAutomaticDimension
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ChatViewController.handleMPCChatReceivedDataWithNotification(_:)), name: "receivedMPCChatDataNotification", object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ChatViewController.handleMPCChatReceivedDisconnectionWithNotification(_:)), name: "receivedMPCDisconnectionNotification", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "handleMPCChatReceivedDataWithNotification:", name: "receivedMPCChatDataNotification", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "handleMPCChatReceivedDisconnectionWithNotification:", name: "receivedMPCDisconnectionNotification", object: nil)
         
     }
 
@@ -49,7 +49,7 @@ class ChatViewController: UIViewController, UITextFieldDelegate, UITableViewDele
     @IBAction func endChat(sender: AnyObject) {
     
         let messageDictionary: [String: String] = [kCommunicationsMessageTerm: kCommunicationsEndConnectionTerm]
-        if appDelegate.mpcManager.sendData(dictionaryWithData: messageDictionary, toPeer: appDelegate.mpcManager.session.connectedPeers[0] ){
+        if appDelegate.mpcManager.sendData(dictionaryWithData: messageDictionary, toPeer: appDelegate.mpcManager.session.connectedPeers[0] as MCPeerID ){
             self.dismissViewControllerAnimated(true, completion: { () -> Void in
                 self.appDelegate.mpcManager.session.disconnect()
             })
@@ -70,7 +70,7 @@ class ChatViewController: UIViewController, UITextFieldDelegate, UITableViewDele
     
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("idCell") as! ChatTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("idCell") as ChatTableViewCell
 
         let currentMessage = messagesArray[indexPath.row] as Dictionary<String, String>
         
@@ -102,7 +102,7 @@ class ChatViewController: UIViewController, UITextFieldDelegate, UITableViewDele
         
         let messageDictionary: [String: String] = [kCommunicationsMessageTerm: textField.text!]
         
-        if appDelegate.mpcManager.sendData(dictionaryWithData: messageDictionary, toPeer: appDelegate.mpcManager.session.connectedPeers[0] ){
+        if appDelegate.mpcManager.sendData(dictionaryWithData: messageDictionary, toPeer: appDelegate.mpcManager.session.connectedPeers[0] as MCPeerID ){
             let dictionary: [String: String] = [kCommunicationsSenderTerm: kCommunicationsSelfTerm, kCommunicationsMessageTerm: textField.text!]
             messagesArray.append(dictionary)
             
@@ -124,14 +124,14 @@ class ChatViewController: UIViewController, UITextFieldDelegate, UITableViewDele
     }
     
     func handleMPCChatReceivedDataWithNotification(notification: NSNotification) {
-        let receivedDataDictionary = notification.object as! Dictionary<String, AnyObject>
+        let receivedDataDictionary = notification.object as Dictionary<String, AnyObject>
         
         //Extract the data and the source peer from the received dictionary
         let data = receivedDataDictionary[kCommunicationsDataTerm] as? NSData
-        let fromPeer = receivedDataDictionary[kCommunicationsFromPeerTerm] as! MCPeerID
+        let fromPeer = receivedDataDictionary[kCommunicationsFromPeerTerm] as MCPeerID
         
         //Convert the data (NSData) into a Dictionary object
-        let dataDictionary = NSKeyedUnarchiver.unarchiveObjectWithData(data!) as! Dictionary<String,String>
+        let dataDictionary = NSKeyedUnarchiver.unarchiveObjectWithData(data!) as Dictionary<String,String>
         
         //Check if there's an entry with the kCommunicationsMessageTerm key
         if let message = dataDictionary[kCommunicationsMessageTerm]{
@@ -165,14 +165,14 @@ class ChatViewController: UIViewController, UITextFieldDelegate, UITableViewDele
     }
     
     func handleMPCChatReceivedDisconnectionWithNotification(notification: NSNotification) {
-        let receivedDataDictionary = notification.object as! Dictionary<String, AnyObject>
+        let receivedDataDictionary = notification.object as Dictionary<String, AnyObject>
         
         //Extract the data and the source peer from the received dictionary
         let data = receivedDataDictionary[kCommunicationsDataTerm ] as? NSData
-        let fromPeer = receivedDataDictionary[kCommunicationsFromPeerTerm] as! MCPeerID
+        let fromPeer = receivedDataDictionary[kCommunicationsFromPeerTerm] as MCPeerID
         
         //Convert the data (NSData) into a Dictionary object
-        let dataDictionary = NSKeyedUnarchiver.unarchiveObjectWithData(data!) as! Dictionary<String,String>
+        let dataDictionary = NSKeyedUnarchiver.unarchiveObjectWithData(data!) as Dictionary<String,String>
         
         //Check if there's an entry with the kCommunicationsMessageTerm key
         if let message = dataDictionary[kCommunicationsMessageTerm]{

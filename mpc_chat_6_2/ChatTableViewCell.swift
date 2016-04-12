@@ -23,9 +23,9 @@ class ChatTableViewCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
-    
+    /*
     required init? (coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-    }
+    }*/
 
 }
